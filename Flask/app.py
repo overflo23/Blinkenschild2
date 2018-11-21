@@ -29,6 +29,7 @@ FUTURE:
 '''
 
 from flask import Flask,render_template, request,json
+from twython import Twython
 
 app = Flask(__name__)
 
@@ -63,13 +64,64 @@ def picture():
 
 	return json.dumps({'status':'OK','picture':'YESS!'})
 
-@app.route('/api/text', methods=['PUT'])
+@app.route('/api/text', methods=['POST'])
 def write_text():
 	print('write_text was called') # DEBUG
 	text = request.form['text']
 	textcolor = request.form['color']
+
 	# TODO: Needs to call backend script, backend script should return success code which gets returned below
 	return json.dumps({'status':'OK','msg':'Displaying text {} in color {}'.format(text, textcolor)})
+
+
+
+
+
+
+APP_KEY="UIVprpANKRSJqx56Pey9mkwB4"
+APP_SECRET="UbolouemM0Ds32Oy6KK7WAWiay32e5O8JEwzB8ng9qMNiPE9yN"
+ACCESS_TOKEN="1062250213555998720-YNBc4AGKAJoFatWksqD3qmVoNEwtdv"
+ACCESS_SECRET="PxaD0PZqL0y0RD7SV1I4zfI3WSW3GVxxj8BUaD2jgCk0S"
+
+
+@app.route('/api/twitter', methods=['GET'])
+def get_tweets():
+    print('get_tweets called') # DEBUG
+
+    twitter = Twython(APP_KEY,APP_SECRET,ACCESS_TOKEN,ACCESS_SECRET)
+    pp = pprint.PrettyPrinter(indent=4)
+    results = twitter.cursor(twitter.search, q='@blinkenschild')
+
+    tweets=[]
+    for result in results:
+        if result["text"].startswith("@blinkenschild"):
+            uname=result["user"]["screen_name"]
+            text=result["text"]
+            tweet = {"user": uname, "msg": text.replace('@blinkenschild','')}
+            tweets.append(tweet)
+
+
+   
+    
+
+    return json.dumps(  tweets );
+
+
+
+
+
+@app.route('/api/twitter', methods=['POST'])
+def show_tweet():
+	print('show_tweet called') # DEBUG
+	text = request.form['tweet']
+        # hier sollten wir den tweet anzeigen.. das keonenn wir direkt in python machen..
+	return json.dumps({'status':'OK','msg':'TWEET {}'.format(text)})
+
+
+
+
+
+
 
 if __name__=="__main__":
 	app.run()

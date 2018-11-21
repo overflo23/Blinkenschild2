@@ -38,9 +38,58 @@
 				<input type="color" name="color">
 				<input type="submit" value="Write">
 			</form>
+
+			<form id="twitter">
+				<input id="tweet" type="hidden"  name="tweet" value="" />
+				<h2>Twitter</h2>
+				<ul id="tweets">
+	                        </ul>				
+			</form>
+
+
+
 		</div>
 	</body>
 	<script type="text/javascript">
+
+
+
+		$(function(){
+			$.getJSON( "/api/twitter", function( data ) {
+				    $.each( data, function(x,t ) {
+					    //console.log( x );
+					    $("ul#tweets").append("<li>@"+t.user+": "+ t.msg+"</li>");
+					    
+                			    $("ul#tweets li").click(function() {
+						t = $(this).text();
+			        		console.log(t);
+						$("#tweet").val(t);
+
+						$("#twitter").submit(function(e){
+						  $.ajax({
+							url: "/api/twitter",
+							type: "POST",
+							data: $("#twitter").serialize(),
+							success: function(response){
+								console.log(response);
+							},
+							error: function(error){
+								console.log(error);
+							}
+				  	          });
+				 		  e.preventDefault();
+			        		});
+		         			$("#twitter").submit();
+					    }); // .click()
+
+					}); //.each
+			}); // .getJson
+               
+		}); // outer wrap
+
+
+
+
 		$(function(){
 			$("#youtube").submit(function(e){
 				$.ajax({
@@ -63,6 +112,25 @@
 
 
 		$(function(){
+			$("#text").submit(function(e){
+				$.ajax({
+					url: "/api/text",
+					type: "POST",
+					data: $("#text").serialize(),
+					success: function(response){
+						console.log(response);
+					},
+					error: function(error){
+						console.log(error);
+					}
+				});
+				e.preventDefault();
+			});
+		});
+
+
+
+		$(function(){
 			$("#pictureUploader").change(function(e){
 				$.ajax({
 					url: "/api/picture",
@@ -77,7 +145,8 @@
 				e.preventDefault();
 			});
 		});
-		function changeHandler(files) {
+
+			function changeHandler(files) {
 			for (let i = 0, file; file = files[i]; i++) {
 				if (!file.type.startsWith("image/")) {
 					continue;
