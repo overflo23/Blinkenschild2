@@ -53,18 +53,27 @@
 	<script type="text/javascript">
 
 
+function update_tweets()
+{
+        $("ul#tweets").empty();
 
-		$(function(){
+	console.log("updating tweets");
 			$.getJSON( "/api/twitter", function( data ) {
 				    $.each( data, function(x,t ) {
 					    //console.log( x );
 					    $("ul#tweets").append("<li>@"+t.user+": "+ t.msg+"</li>");
-					    
+					     });
+
                 			    $("ul#tweets li").click(function() {
 						t = $(this).text();
 			        		console.log(t);
 						$("#tweet").val(t);
 
+						$("#twitter").submit();
+					    }); // .click()
+
+			}); // .getJson
+ 
 						$("#twitter").submit(function(e){
 						  $.ajax({
 							url: "/api/twitter",
@@ -77,18 +86,16 @@
 								console.log(error);
 							}
 				  	          });
-				 		  e.preventDefault();
-			        		});
-		         			$("#twitter").submit();
-					    }); // .click()
+              e.preventDefault();
 
-					}); //.each
-			}); // .getJson
-               
-		}); // outer wrap
+        });
+
+//setTimeout(update_tweets, 5000);
+}
 
 
 
+$(function(){update_tweets();});
 
 		$(function(){
 			$("#youtube").submit(function(e){

@@ -30,8 +30,33 @@ FUTURE:
 
 from flask import Flask,render_template, request,json
 from twython import Twython
-
+#import hashlib
+import os
+import signal
+import subprocess
+import time
 app = Flask(__name__)
+
+#external_proc = False 
+
+pr = 0;
+
+def run_process(string):
+    global pr
+    try:
+            subprocess.Popen(["sudo", "kill", str(pr.pid)])
+    except:
+        pass
+
+    pr = subprocess.Popen(["sudo","/media/external/scripts/twitter.py", "--led-rows=16", "--led-cols=32", "--led-chain=2",  "--led-parallel=3", "--led-brightness=50", "--led-multiplexing=0",  "-t", string], preexec_fn=os.setpgrp)
+
+    
+    
+#    if(external_proc.pid):
+#        external_proc.kill();
+#    external_proc = subprocess.Popen("/media/external/scripts/twitter.sh")
+
+
 
 @app.route('/')
 def hello():
@@ -89,7 +114,6 @@ def get_tweets():
     print('get_tweets called') # DEBUG
 
     twitter = Twython(APP_KEY,APP_SECRET,ACCESS_TOKEN,ACCESS_SECRET)
-    pp = pprint.PrettyPrinter(indent=4)
     results = twitter.cursor(twitter.search, q='@blinkenschild')
 
     tweets=[]
@@ -101,9 +125,9 @@ def get_tweets():
             tweets.append(tweet)
 
 
-   
     
 
+#    print hashlib.md5(tweets)
     return json.dumps(  tweets );
 
 
@@ -112,10 +136,11 @@ def get_tweets():
 
 @app.route('/api/twitter', methods=['POST'])
 def show_tweet():
-	print('show_tweet called') # DEBUG
-	text = request.form['tweet']
-        # hier sollten wir den tweet anzeigen.. das keonenn wir direkt in python machen..
-	return json.dumps({'status':'OK','msg':'TWEET {}'.format(text)})
+    print('show_tweet called') # DEBUG
+    text = request.form['tweet']
+    run_process(text)
+    # hier sollten wir den tweet anzeigen.. das keonenn wir direkt in python machen..
+    return json.dumps({'status':'OK','msg':'TWEET {}'.format(text)})
 
 
 
