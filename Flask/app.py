@@ -32,14 +32,41 @@ from flask import Flask,render_template, request,json
 from twython import Twython
 #import hashlib
 import os
-import signal
+#import signal
 import subprocess
-import time
+
+
+
 app = Flask(__name__)
 
-#external_proc = False 
 
-pr = 0;
+
+
+def kill_old_process():
+    file = open("/tmp/python_duo_external.pid.txt","r")
+    pid=file.read()
+    file.close()
+ #   print "killing " + pid
+    subprocess.Popen(["sudo", "kill", str(pid)])
+
+
+
+
+def run_process(string):
+    kill_old_process()
+    pr = subprocess.Popen(["sudo","/media/external/scripts/twitter.py", "--led-rows=16", "--led-cols=32", "--led-chain=2",  "--led-parallel=3", "--led-brightness=50", "--led-multiplexing=0",  "-t", string], preexec_fn=os.setpgrp)
+    pid = pr.pid
+    file = open("/tmp/python_duo_external.pid.txt","w")
+    file.write(str(pid))
+    file.close()
+#    print "saving pid to file " + str(pid)
+
+
+
+
+
+
+
 
 def run_process(string):
     global pr
