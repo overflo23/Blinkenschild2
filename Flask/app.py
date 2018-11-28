@@ -68,14 +68,14 @@ def run_process(string):
 
 
 
-def run_process(string):
+def run_process(exec_this):
     global pr
     try:
             subprocess.Popen(["sudo", "kill", str(pr.pid)])
     except:
         pass
 
-    pr = subprocess.Popen(["sudo","/media/external/scripts/twitter.py", "--led-rows=16", "--led-cols=32", "--led-chain=2",  "--led-parallel=3", "--led-brightness=50", "--led-multiplexing=0",  "-t", string], preexec_fn=os.setpgrp)
+    pr = subprocess.Popen(exec_this.split(), preexec_fn=os.setpgrp)
 
     
     
@@ -104,20 +104,20 @@ def youtube():
 		# TODO: As far as I know the current backend script can only download but not display?
 		return json.dumps({'status':'OK','msg':'Playing video {}'.format(videolink)})
 
+
+
+
+
+
 @app.route('/api/pictures', methods=['POST', 'PUT'])
 def picture():
-	print('picture was called') # DEBUG
-	if request.method == 'POST':
-		for filename in request.files: # TODO: multipart mode on form
-			print(filename)
-			# TODO: Save files with their checksums and return the checksums
-		return json.dumps({'status':'OK','msg':'Downloaded video {}'.format(videolink)})
-	elif request.method == 'PUT':
-		# How do we know which files?
-		# TODO: Needs to call backend script, backend script should return success code which gets returned below
-		return json.dumps({'status':'OK','msg':'Playing video {}'.format(videolink)})
+    print('picture was called') # DEBUG
+    pic = request.form['pic']
+    run_process("scripts/display_picture.sh " + pic)
 
-	return json.dumps({'status':'OK','picture':'YESS!'})
+    return json.dumps({'status':'OK','picture':pic})
+
+
 
 @app.route('/api/pictures', methods=['GET'])
 def get_pics():

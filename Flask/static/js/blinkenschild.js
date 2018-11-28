@@ -6,27 +6,25 @@ function update_pics()
    $.getJSON( "/api/pictures", function( data ) {
         $.each( data, function(x,t ) {
         console.log( t );
-        $("ul#pics").append("<img src='static/pics/"+t+"'>");
+        $("ul#pics").append("<li><img src='static/pics/"+t+"'></li>");
         });
 
-	   /*
 
-                                            $("ul#tweets li").click(function() {
-                                                t = $(this).text();
-                                                console.log(t);
-                                                $("#tweet").val(t);
+        $("ul#pics li img").click(function() {
+                t = $(this).attr("src");
+                console.log(t);
+                $("#pic").val(t);
 
-                                                $("#twitter").submit();
-                                            }); // .click()
+                $("#pictures").submit();
+        }); // .click()
 
-          */
    }); // .getJson
 
    $("#pictures").submit(function(e){
        $.ajax({
            url: "/api/pictures",
            type: "POST",
-//           data: $("#twitter").serialize(),
+           data: $("#pictures").serialize(),
            success: function(response){
              console.log(response);
            },
