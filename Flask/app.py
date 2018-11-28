@@ -34,7 +34,8 @@ from twython import Twython
 import os
 #import signal
 import subprocess
-
+from os import listdir
+from os.path import isfile, join
 
 
 app = Flask(__name__)
@@ -59,7 +60,6 @@ def run_process(string):
     file = open("/tmp/python_duo_external.pid.txt","w")
     file.write(str(pid))
     file.close()
-#    print "saving pid to file " + str(pid)
 
 
 
@@ -89,6 +89,9 @@ def run_process(string):
 def hello():
 	return render_template('main.html', current_task='Nothing') # TODO: should display what the schild is currently doing
 
+
+
+
 @app.route('/api/youtube', methods=['POST', 'PUT'])
 def youtube():
 	print('youtube was called') # DEBUG
@@ -101,7 +104,7 @@ def youtube():
 		# TODO: As far as I know the current backend script can only download but not display?
 		return json.dumps({'status':'OK','msg':'Playing video {}'.format(videolink)})
 
-@app.route('/api/picture', methods=['POST', 'PUT'])
+@app.route('/api/pictures', methods=['POST', 'PUT'])
 def picture():
 	print('picture was called') # DEBUG
 	if request.method == 'POST':
@@ -115,6 +118,15 @@ def picture():
 		return json.dumps({'status':'OK','msg':'Playing video {}'.format(videolink)})
 
 	return json.dumps({'status':'OK','picture':'YESS!'})
+
+@app.route('/api/pictures', methods=['GET'])
+def get_pics():
+    pictures = [f for f in listdir("pics") if isfile(join("pics", f))]
+    return json.dumps(pictures)
+
+
+
+
 
 @app.route('/api/text', methods=['POST'])
 def write_text():
