@@ -30,15 +30,16 @@ FUTURE:
 
 from flask import Flask,render_template, request,json
 from twython import Twython
-#import hashlib
 import os
-#import signal
 import subprocess
 from os import listdir
 from os.path import isfile, join
-
+from TC import *
 
 app = Flask(__name__)
+
+
+
 
 
 
@@ -108,17 +109,16 @@ def youtube():
 
 
 
-
+# display chosen picture
 @app.route('/api/pictures', methods=['POST', 'PUT'])
 def picture():
-    print('picture was called') # DEBUG
     pic = request.form['pic']
     run_process("scripts/display_picture.sh " + pic)
 
     return json.dumps({'status':'OK','picture':pic})
 
 
-
+# send a list of pics to the  client
 @app.route('/api/pictures', methods=['GET'])
 def get_pics():
     pictures = [f for f in listdir("pics") if isfile(join("pics", f))]
@@ -130,22 +130,18 @@ def get_pics():
 
 @app.route('/api/text', methods=['POST'])
 def write_text():
-	print('write_text was called') # DEBUG
-	text = request.form['text']
-	textcolor = request.form['color']
+    print('write_text was called') # DEBUG
+    text = request.form['text']
+    textcolor = request.form['color']
+    run_process("scripts/display_text.sh " + text +" \\" + textcolor)
 
-	# TODO: Needs to call backend script, backend script should return success code which gets returned below
-	return json.dumps({'status':'OK','msg':'Displaying text {} in color {}'.format(text, textcolor)})
-
-
+    return json.dumps({'status':'OK','msg':'Displaying text {} in color {}'.format(text, textcolor)})
 
 
 
 
-APP_KEY="UIVprpANKRSJqx56Pey9mkwB4"
-APP_SECRET="UbolouemM0Ds32Oy6KK7WAWiay32e5O8JEwzB8ng9qMNiPE9yN"
-ACCESS_TOKEN="1062250213555998720-YNBc4AGKAJoFatWksqD3qmVoNEwtdv"
-ACCESS_SECRET="PxaD0PZqL0y0RD7SV1I4zfI3WSW3GVxxj8BUaD2jgCk0S"
+
+
 
 
 @app.route('/api/twitter', methods=['GET'])
@@ -163,10 +159,6 @@ def get_tweets():
             tweet = {"user": uname, "msg": text.replace('@blinkenschild','')}
             tweets.append(tweet)
 
-
-    
-
-#    print hashlib.md5(tweets)
     return json.dumps(  tweets );
 
 
@@ -177,8 +169,7 @@ def get_tweets():
 def show_tweet():
     print('show_tweet called') # DEBUG
     text = request.form['tweet']
-    run_process(text)
-    # hier sollten wir den tweet anzeigen.. das keonenn wir direkt in python machen..
+    run_process("scripts/display_twitter.sh " + text )
     return json.dumps({'status':'OK','msg':'TWEET {}'.format(text)})
 
 
