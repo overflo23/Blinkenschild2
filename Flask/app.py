@@ -36,6 +36,10 @@ from os import listdir
 from os.path import isfile, join
 from TC import *
 
+
+BASEPATH="/home/pi/Blinkenschild2"
+
+
 app = Flask(__name__)
 
 
@@ -44,46 +48,30 @@ app = Flask(__name__)
 
 
 
-def kill_old_process():
-    file = open("/tmp/python_duo_external.pid.txt","r")
-    pid=file.read()
-    file.close()
- #   print "killing " + pid
-    subprocess.Popen(["sudo", "kill", str(pid)])
-
-
-
-
-def run_process(string):
-    kill_old_process()
-    pr = subprocess.Popen(["sudo","/media/external/scripts/twitter.py", "--led-rows=16", "--led-cols=32", "--led-chain=2",  "--led-parallel=3", "--led-brightness=50", "--led-multiplexing=0",  "-t", string], preexec_fn=os.setpgrp)
-    pid = pr.pid
-    file = open("/tmp/python_duo_external.pid.txt","w")
-    file.write(str(pid))
-    file.close()
-
-
-
-
-
+def kill_old_processes():
+    try:
+        os.system(BASEPATH+"/scripts/killall.sh")
+    except:
+        pass
 
 
 
 def run_process(exec_this):
-    global pr
-    try:
-            subprocess.Popen(["sudo", "kill", str(pr.pid)])
-    except:
-        pass
+    kill_old_processes()
+    pr = subprocess.Popen(exec_this.split(),  preexec_fn=os.setsid) 
 
-    pr = subprocess.Popen(exec_this.split(), preexec_fn=os.setpgrp)
 
-    
-    
-#    if(external_proc.pid):
-#        external_proc.kill();
-#    external_proc = subprocess.Popen("/media/external/scripts/twitter.sh")
 
+def hex2rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+
+
+#def hex2rgb(hexcode):
+#    print("hex: " + hexcode)
+#    return tuple(map(ord,hexcode[1:].decode('hex')))
 
 
 @app.route('/')
@@ -113,8 +101,8 @@ def youtube():
 @app.route('/api/pictures', methods=['POST', 'PUT'])
 def picture():
     pic = request.form['pic']
+#    run_process("sudo " + BASEPATH + "/bin/led-image-viewer --led-rows=16 --led-cols=32 --led-chain=2  --led-parallel=3 --led-brightness=100 --led-multiplexing=0  -C "+ BASEPATH +"/Flask/"  +pic)   
     run_process("scripts/display_picture.sh " + pic)
-
     return json.dumps({'status':'OK','picture':pic})
 
 
@@ -127,15 +115,16 @@ def get_pics():
 
 
 
-
 @app.route('/api/text', methods=['POST'])
 def write_text():
     print('write_text was called') # DEBUG
     text = request.form['text']
-    textcolor = request.form['color']
-    run_process("scripts/display_text.sh " + text +" \\" + textcolor)
+    textcolor = hex2rgb(request.form['textcolor'])
+    bordercolor = hex2rgb(request.form['bordercolor'])
 
-    return json.dumps({'status':'OK','msg':'Displaying text {} in color {}'.format(text, textcolor)})
+    run_process("scripts/display_text.sh " + text +" " + str(textcolor[0]) +","+str(textcolor[1]) +"," + str(textcolor[2])  + " " + str(bordercolor[0]) + "," + str(bordercolor[1]) +"," + str(bordercolor[2])) 
+
+    return json.dumps({'status':'OK','msg':'Displaying text {}'.format(text)})
 
 
 
